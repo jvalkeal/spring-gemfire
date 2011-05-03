@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+	default-lazy-init="true">
+
+	<!-- all beans are lazy to allow the same config to be used between multiple 
+		tests -->
+	<!-- as there can be only one cache per VM -->
+
+	<bean id="cache-with-xml" class="org.springframework.data.gemfire.CacheFactoryBean">
+		<property name="cacheXml" value="classpath:cache.xml" />
+		<property name="properties">
+			<props>
+				<prop key="name">cache-with-xml</prop>
+				<prop key="log-level">config</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="basic-cacheserver"
+		class="org.springframework.data.gemfire.server.CacheServerFactoryBean">
+
+		<property name="cache" ref="cache-with-xml" />
+	</bean>
+
+	<bean id="advanced-cacheserver"
+		class="org.springframework.data.gemfire.server.CacheServerFactoryBean">
+
+		<property name="autoStart" value="false" />
+		<property name="cache" ref="cache-with-xml" />
+		<property name="bindAddress" value="localhost" />
+		<property name="port" value="40406" />
+		<property name="hostNameForClients" value="localhost" />
+		<property name="loadPollInterval" value="2000" />
+		<property name="maxConnections" value="64" />
+		<property name="maxThreads" value="16" />
+		<property name="maxMessageCount" value="1000" />
+		<property name="maxTimeBetweenPings" value="30000" />
+
+		<property name="serverGroups">
+			<list>
+				<value>DEFAULT</value>
+			</list>
+		</property>
+		<property name="evictionPolicy" value="entry" />
+		<property name="evictionCapacity" value="1000" />
+		<property name="overFlowDirectory" value="${java.io.tmpdir}" />
+	</bean>
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="searchSystemEnvironment" value="true" />
+	</bean>
+
+</beans>

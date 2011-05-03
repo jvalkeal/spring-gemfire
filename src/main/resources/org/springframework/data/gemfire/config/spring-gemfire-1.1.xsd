@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.springframework.org/schema/gemfire"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:tool="http://www.springframework.org/schema/tool"
+	targetNamespace="http://www.springframework.org/schema/gemfire"
+	elementFormDefault="qualified" attributeFormDefault="unqualified"
+	version="1.0.1">
+
+	<xsd:include schemaLocation="spring-gemfire-1.0.xsd" />
+
+	<xsd:complexType name="serverGroupType">
+		<xsd:sequence>
+			<xsd:element name="servergroup">
+				<xsd:complexType>
+					<xsd:attribute name="groupname" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+The server group name that this server will be a member of.				
+				]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="clientNotificationEvictionPolicyType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="none">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+No eviction (default)
+							]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="entry">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+An eviction that is governed by the entry count in the client queue.
+							]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="mem">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+Client queue eviction based on the heap estimate of the client queue.
+							]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="clientSubscriptionConfigType">
+		<xsd:choice>
+			<xsd:element name="disk-store">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+The configured disk store information that is to be used for the overflow files. 
+This disk-store-name is valid only for GemFire 6.5+. Use of disk-store-name is 
+mutually exclusive to overflow-directory in GemFire 6.5.x. Any attempt to use both
+will result in an <code>IllegalStateException</code> in GemFire 6.5.x.
+The disk-store-name is ignored in GemFire versions prior to 6.5.				
+				]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute name="disk-store-name" use="optional"
+						type="xsd:string" />
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="overflow-directory">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+The configured disk store information that is to be used for the overflow files. 
+This disk-store-name is valid only for GemFire 6.5+. Use of disk-store-name is 
+mutually exclusive to overflow-directory in GemFire 6.5.x. Any attempt to use both
+will result in an <code>IllegalStateException</code> in GemFire 6.5.x.
+The disk-store-name is ignored in GemFire versions prior to 6.5.				
+				]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:attribute name="directory-path" use="optional"
+						type="xsd:string" />
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:choice>
+		<xsd:attribute name="eviction-type" use="optional"
+			type="clientNotificationEvictionPolicyType" default="none">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+Eviction policy for cache server client queues.
+			]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="eviction-capacity" use="optional"
+			type="xsd:long" default="1" />
+	</xsd:complexType>
+
+	<xsd:element name="cacheserver">
+		<xsd:annotation>
+			<xsd:documentation
+				source="org.springframework.data.gemfire.server.CacheServerFactoryBean"><![CDATA[
+Defines a Cache Server for communications from remote gemfire clients to a server GemFire Cache Servers.
+Note: In order to instantiate a cacheserver, a GemFire cache needs to be avaialble in the VM.
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="com.gemstone.gemfire.cache.server.CacheServer" />
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence minOccurs="0" maxOccurs="1">
+				<xsd:element name="servergroups" type="serverGroupType"
+					minOccurs="0" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+The server groups that this server will be a member of. Clients can then target communication towards a server in the group.				
+				]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="client-subscription-config" type="clientSubscriptionConfigType"
+					minOccurs="0" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+The client subscription configuration that is used to control a clients use of server resources towards notification queues.				
+				]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:sequence>
+
+			<xsd:attribute name="id" type="xsd:ID" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+The name of the cache server definition (by default gemfire-server).]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="autoStart" use="optional" type="xsd:boolean"
+				default="true" />
+			<xsd:attribute name="bind-address" use="optional" type="xsd:string" />
+			<xsd:attribute name="port" use="optional" type="xsd:string"
+				default="40404">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+The port number of the server (between 1 and 65535 inclusive). Privileged ports (typically 1-1024) require adequate previleges.				
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="host-name-for-clients" use="optional"
+				type="xsd:string" />
+			<xsd:attribute name="load-poll-interval" use="optional"
+				type="xsd:long" default="5000" />
+			<xsd:attribute name="max-connections" use="optional"
+				type="xsd:int" default="800" />
+			<xsd:attribute name="max-threads" use="optional" type="xsd:int"
+				default="0" />
+			<xsd:attribute name="max-message-count" use="optional"
+				type="xsd:int" default="230000" />
+			<xsd:attribute name="max-time-between-pings" use="optional"
+				type="xsd:long" default="60000" />
+			<xsd:attribute name="message-time-to-live" use="optional"
+				type="xsd:int" default="180" />
+			<xsd:attribute name="socket-buffer-size" use="optional"
+				type="xsd:int" default="32768" />
+			<xsd:attribute name="notify-by-subscription" use="optional"
+				type="xsd:boolean" default="true" />
+
+			<xsd:attribute name="cache-ref" type="xsd:string"
+				default="gemfire-cache" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+The name of the bean defining the GemFire cache (by default 'gemfire-cache').
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="custom-load-probe-ref" use="optional"
+				type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+The name of the bean defining the Server Load Probe.
+				]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

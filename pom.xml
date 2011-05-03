@@ -33,6 +33,17 @@
       </roles>
       <timezone>+2</timezone>
     </developer>
+    <developer>
+      <id>vinesh</id>
+      <name>Vinesh Prasanna M</name>
+      <email>manoharanv at VMware.com</email>
+      <organization>SpringSource</organization>
+      <organizationUrl>http://www.SpringSource.com</organizationUrl>
+      <roles>
+        <role>Developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <licenses>
@@ -205,9 +216,9 @@ limitations under the License.
           <version>2.0-beta-6</version>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.3</version>
+        	<groupId>org.apache.maven.plugins</groupId>
+        	<artifactId>maven-compiler-plugin</artifactId>
+        	<version>2.3.2</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -240,6 +251,7 @@ limitations under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.2</version>
         <configuration>
           <aggregate>true</aggregate>
         </configuration>
@@ -247,6 +259,7 @@ limitations under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.8.1</version>
         <configuration>
           <aggregate>true</aggregate>
         </configuration>
@@ -258,6 +271,7 @@ limitations under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
         <configuration>
           <aggregate>true</aggregate>
           <stylesheetfile>${javadoc.loc}/javadoc.css</stylesheetfile>
@@ -307,6 +321,7 @@ limitations under the License.
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
         <!--
           <xmlOutput>true</xmlOutput>
@@ -343,6 +358,7 @@ limitations under the License.
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jdepend-maven-plugin</artifactId>
+        <version>2.0-beta-2</version>
       </plugin>
     </plugins>
   </reporting>

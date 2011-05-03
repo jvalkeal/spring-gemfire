@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gfe="http://www.springframework.org/schema/gemfire"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	default-lazy-init="true"
+	xsi:schemaLocation="http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- all beans are lazy to allow the same configuration to be used between 
+		multiple tests -->
+	<!-- as there can be only one cache per VM -->
+
+	<util:properties id="props">
+		<prop key="disable-tcp">false</prop>
+	</util:properties>
+
+	<gfe:cache id="cache-with-xml" cache-xml-location="classpath:cache.xml"
+		properties-ref="props" />
+
+	<!-- A simple example that references a cache -->
+	<gfe:cacheserver cache-ref="cache-with-xml" />
+
+	<!-- Advanced example depicting various cache server configuration options -->
+	<gfe:cacheserver id="complexserver" autoStart="false"
+		bind-address="localhost" port="${gfe.port.6}" host-name-for-clients="localhost"
+		load-poll-interval="2000" max-connections="64" max-threads="16"
+		max-message-count="1000" max-time-between-pings="30000" cache-ref="cache-with-xml">
+
+		<gfe:servergroups>
+			<gfe:servergroup groupname="DEFAULT" />
+		</gfe:servergroups>
+		<gfe:client-subscription-config
+			eviction-type="entry" eviction-capacity="1000">
+			<gfe:overflow-directory directory-path="${java.io.tmpdir}" />
+		</gfe:client-subscription-config>
+	</gfe:cacheserver>
+
+	<context:property-placeholder location="classpath:port.properties" />
+</beans>

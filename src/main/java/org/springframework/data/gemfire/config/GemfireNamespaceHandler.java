@@ -28,11 +28,16 @@ class GemfireNamespaceHandler extends NamespaceHandlerSupport {
 	public void init() {
 		registerBeanDefinitionParser("cache", new CacheParser());
 		registerBeanDefinitionParser("lookup-region", new LookupRegionParser());
-		registerBeanDefinitionParser("replicated-region", new ReplicatedRegionParser());
-		registerBeanDefinitionParser("partitioned-region", new PartitionedRegionParser());
+		registerBeanDefinitionParser("replicated-region",
+				new ReplicatedRegionParser());
+		registerBeanDefinitionParser("partitioned-region",
+				new PartitionedRegionParser());
 		registerBeanDefinitionParser("client-region", new ClientRegionParser());
 		registerBeanDefinitionParser("pool", new PoolParser());
 
-		registerBeanDefinitionParser("transaction-manager", new TransactionManagerParser());
+		registerBeanDefinitionParser("transaction-manager",
+				new TransactionManagerParser());
+
+		registerBeanDefinitionParser("cacheserver", new CacheServerParser());
 	}
 }
