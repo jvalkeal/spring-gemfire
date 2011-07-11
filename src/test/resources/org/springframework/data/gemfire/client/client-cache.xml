@@ -6,8 +6,6 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean class="org.springframework.data.gemfire.client.ClientCacheFactoryBean"/>
-        <property name="pool" ref="pool"/>
-    </bean>
 
     <gfe:pool id="pool">
         <gfe:locator host="localhost" port="12345"/>
