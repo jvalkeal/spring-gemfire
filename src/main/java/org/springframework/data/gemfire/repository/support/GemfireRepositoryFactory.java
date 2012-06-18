@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.data.gemfire.GemfireTemplate;
+import org.springframework.data.gemfire.dlock.DistibutedLockRepositoryPostProcessor;
+import org.springframework.data.gemfire.dlock.GemfireDistributedLockService;
 import org.springframework.data.gemfire.mapping.GemfireMappingContext;
 import org.springframework.data.gemfire.mapping.GemfirePersistentEntity;
 import org.springframework.data.gemfire.mapping.GemfirePersistentProperty;
@@ -48,20 +50,35 @@ public class GemfireRepositoryFactory extends RepositoryFactorySupport {
 
 	private final MappingContext<? extends GemfirePersistentEntity<?>, GemfirePersistentProperty> context;
 	private final Regions regions;
+	private GemfireDistributedLockService gemfireDistributedLockService;
 
 	/**
 	 * Creates a new {@link GemfireRepositoryFactory}.
 	 * 
 	 * @param regions must not be {@literal null}.
 	 * @param context
+     * @param gemfireDistributedLockService Distributed locking service.
 	 */
 	public GemfireRepositoryFactory(Iterable<Region<?, ?>> regions,
-			MappingContext<? extends GemfirePersistentEntity<?>, GemfirePersistentProperty> context) {
+			MappingContext<? extends GemfirePersistentEntity<?>, GemfirePersistentProperty> context,
+			GemfireDistributedLockService gemfireDistributedLockService) {
 
 		Assert.notNull(regions);
 
 		this.context = context == null ? new GemfireMappingContext() : context;
 		this.regions = new Regions(regions, this.context);
+		this.gemfireDistributedLockService = gemfireDistributedLockService;
+	}
+	
+    /**
+     * Creates a new {@link GemfireRepositoryFactory}.
+     * 
+     * @param regions must not be {@literal null}.
+     * @param context
+     */
+	public GemfireRepositoryFactory(Iterable<Region<?, ?>> regions,
+	        MappingContext<? extends GemfirePersistentEntity<?>, GemfirePersistentProperty> context) {
+	    this(regions, context, null);
 	}
 
 	/*
@@ -86,6 +103,13 @@ public class GemfireRepositoryFactory extends RepositoryFactorySupport {
 
 		GemfireEntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
 		GemfireTemplate gemfireTemplate = getTemplate(metadata);
+		
+		if(gemfireDistributedLockService != null) {
+		    // pass repository interface name which can be used
+		    // as a default dlock service name if needed.
+	        String repoInterfaceName = metadata.getRepositoryInterface().getName();
+	        addRepositoryProxyPostProcessor(new DistibutedLockRepositoryPostProcessor(gemfireDistributedLockService, repoInterfaceName));		    
+		}
 
 		return new SimpleGemfireRepository(gemfireTemplate, entityInformation);
 	}

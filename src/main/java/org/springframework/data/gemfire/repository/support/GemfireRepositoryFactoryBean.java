@@ -17,11 +17,16 @@ package org.springframework.data.gemfire.repository.support;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.data.gemfire.dlock.GemfireDistributedLockService;
 import org.springframework.data.gemfire.mapping.GemfirePersistentEntity;
 import org.springframework.data.gemfire.mapping.GemfirePersistentProperty;
 import org.springframework.data.mapping.context.MappingContext;
@@ -42,6 +47,7 @@ RepositoryFactoryBeanSupport<T, S, ID> implements ApplicationContextAware {
 
 	private MappingContext<? extends GemfirePersistentEntity<?>, GemfirePersistentProperty> context;
 	private Iterable<Region<?, ?>> regions;
+	private GemfireDistributedLockService gemfireDistributedLockService;
 
 	/*
 	 * (non-Javadoc)
@@ -52,6 +58,7 @@ RepositoryFactoryBeanSupport<T, S, ID> implements ApplicationContextAware {
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		Collection<Region> regions = applicationContext.getBeansOfType(Region.class).values();
 		this.regions = Collections.unmodifiableCollection(regions);
+		gemfireDistributedLockService = getGemfireDistributedLockService(applicationContext);
 	}
 
 	/**
@@ -69,6 +76,35 @@ RepositoryFactoryBeanSupport<T, S, ID> implements ApplicationContextAware {
 	 */
 	@Override
 	protected RepositoryFactorySupport createRepositoryFactory() {
-		return new GemfireRepositoryFactory(regions, context);
+		return new GemfireRepositoryFactory(regions, context, gemfireDistributedLockService);
 	}
+	
+	/**
+	 * Finds distributed locking service from application context.
+	 * 
+	 * @param applicationContext
+	 * @return Distributed locking service if exists, null otherwise.
+	 */
+    protected GemfireDistributedLockService getGemfireDistributedLockService(ApplicationContext applicationContext) {
+        GemfireDistributedLockService gemfireDistributedLockService = null;
+        Map<String, GemfireDistributedLockService> dLockServices = null;
+        try {
+            dLockServices = applicationContext.getBeansOfType(GemfireDistributedLockService.class);
+        } catch (BeansException e) {
+            // no dlocks
+        }
+        // get bean with name "distributedLockService" or one from a map
+        if(dLockServices != null) {
+            gemfireDistributedLockService = dLockServices.get("distributedLockService");
+            if(gemfireDistributedLockService == null) {
+                Set<Entry<String, GemfireDistributedLockService>> entrySet = dLockServices.entrySet();
+                Iterator<Entry<String, GemfireDistributedLockService>> iterator = entrySet.iterator();
+                if(iterator.hasNext()) {
+                    gemfireDistributedLockService = iterator.next().getValue();
+                }
+            }            
+        }
+        return gemfireDistributedLockService;
+    }
+
 }
