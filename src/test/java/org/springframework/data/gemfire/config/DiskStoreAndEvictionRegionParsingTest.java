@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,17 @@ public class DiskStoreAndEvictionRegionParsingTest {
 
 	@Autowired
 	private ApplicationContext context;
+	
+	@BeforeClass
+	public static void setup() {
+	    // make sure we have a tmp dir
+	    File dir = new File("build/tmp");
+	    if(dir.exists()) {
+	        assertTrue(dir.isDirectory());	        
+	    } else {
+	        assertTrue(dir.mkdir());	        
+	    }
+	}
 
 	@Test
 	public void testReplicaDataOptions() throws Exception {

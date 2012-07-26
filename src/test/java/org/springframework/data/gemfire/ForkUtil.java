@@ -99,8 +99,15 @@ public class ForkUtil {
 		return os;
 	}
 
-	public static OutputStream cacheServer() {
-		String className = "org.springframework.data.gemfire.fork.CacheServerProcess";
+	   public static OutputStream cacheServer(Class<?> clazz) {
+	        return cacheServer(clazz.getName());
+	    }
+	    public static OutputStream cacheServer() {
+	        return cacheServer("org.springframework.data.gemfire.fork.CacheServerProcess");
+	    }
+
+	public static OutputStream cacheServer(String className) {
+//		String className = "org.springframework.data.gemfire.fork.CacheServerProcess";
 		if (controlFileExists(className)) {
 			deleteControlFile(className);
 		}

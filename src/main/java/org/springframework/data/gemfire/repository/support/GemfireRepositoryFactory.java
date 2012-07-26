@@ -18,11 +18,17 @@ package org.springframework.data.gemfire.repository.support;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.data.gemfire.GemfireTemplate;
+import org.springframework.data.gemfire.function.GemfireFunctionTemplate;
 import org.springframework.data.gemfire.mapping.GemfireMappingContext;
 import org.springframework.data.gemfire.mapping.GemfirePersistentEntity;
 import org.springframework.data.gemfire.mapping.GemfirePersistentProperty;
 import org.springframework.data.gemfire.mapping.Regions;
+import org.springframework.data.gemfire.repository.function.GemfireFunctionMethod;
+import org.springframework.data.gemfire.repository.function.GemfireRepositoryFunction;
 import org.springframework.data.gemfire.repository.query.DefaultGemfireEntityInformation;
 import org.springframework.data.gemfire.repository.query.GemfireEntityInformation;
 import org.springframework.data.gemfire.repository.query.GemfireQueryMethod;
@@ -30,8 +36,10 @@ import org.springframework.data.gemfire.repository.query.PartTreeGemfireReposito
 import org.springframework.data.gemfire.repository.query.StringBasedGemfireRepositoryQuery;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.repository.core.NamedQueries;
+import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+import org.springframework.data.repository.core.support.RepositoryProxyPostProcessor;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import org.springframework.data.repository.query.RepositoryQuery;
@@ -86,7 +94,7 @@ public class GemfireRepositoryFactory extends RepositoryFactorySupport {
 
 		GemfireEntityInformation<?, Serializable> entityInformation = getEntityInformation(metadata.getDomainType());
 		GemfireTemplate gemfireTemplate = getTemplate(metadata);
-
+		
 		return new SimpleGemfireRepository(gemfireTemplate, entityInformation);
 	}
 
@@ -112,6 +120,30 @@ public class GemfireRepositoryFactory extends RepositoryFactorySupport {
 		}
 
 		return new GemfireTemplate(region);
+	}
+	
+	private GemfireFunctionTemplate getFunctionTemplate(RepositoryMetadata metadata) {
+	    
+        Class<?> domainClass = metadata.getDomainType();
+        GemfirePersistentEntity<?> entity = context.getPersistentEntity(domainClass);
+
+        Region<?, ?> region = regions.getRegion(domainClass);
+
+        if (region == null) {
+            throw new IllegalStateException(String.format("No region '%s' found for domain class %s! Make sure you have "
+                    + "configured a Gemfire region of that name in your application context!", entity.getRegionName(), domainClass));
+        }
+
+        Class<?> regionKeyType = region.getAttributes().getKeyConstraint();
+        Class<?> entityIdType = metadata.getIdType();
+
+        if (regionKeyType != null && entity.getIdProperty() != null) {
+            Assert.isTrue(regionKeyType.isAssignableFrom(entityIdType), String.format(
+                    "The region referenced only supports keys of type %s but the entity to be stored has an id of type %s!",
+                    regionKeyType, entityIdType));
+        }
+        
+        return new GemfireFunctionTemplate(region);
 	}
 
 	/*
@@ -139,6 +171,13 @@ public class GemfireRepositoryFactory extends RepositoryFactorySupport {
 				if (queryMethod.hasAnnotatedQuery()) {
 					return new StringBasedGemfireRepositoryQuery(queryMethod, template);
 				}
+				
+				GemfireFunctionMethod functionMethod = new GemfireFunctionMethod(method, metadata);
+				GemfireFunctionTemplate functionTemplate = getFunctionTemplate(metadata);
+				
+				if (functionMethod.hasAnnotatedFunction()) {
+				    return new GemfireRepositoryFunction(functionMethod, functionTemplate);
+				}
 
 				String namedQueryName = queryMethod.getNamedQueryName();
 				if (namedQueries.hasQuery(namedQueryName)) {
@@ -149,4 +188,5 @@ public class GemfireRepositoryFactory extends RepositoryFactorySupport {
 			}
 		};
 	}
+	
 }
