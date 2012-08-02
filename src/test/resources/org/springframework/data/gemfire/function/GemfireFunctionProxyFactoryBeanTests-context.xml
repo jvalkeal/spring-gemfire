@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:gfe="http://www.springframework.org/schema/gemfire"
+	xsi:schemaLocation="http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="customFunctions" class="org.springframework.data.gemfire.function.CustomFunctionsImpl"/>
+
+	<bean id="customFunctionsProxyFunctionIdContextResultsVoid" class="org.springframework.data.gemfire.function.support.GemfireFunctionProxyFactoryBean">
+	   <property name="target" ref="customFunctions"/>
+       <property name="methodName" value="functionIdContextResultsVoid"/>
+       <property name="functionName" value="FunctionIdContextResultsVoid"/>
+	</bean>
+
+    <bean id="customFunctionsProxyFunctionExecuteContextResultsInt" class="org.springframework.data.gemfire.function.support.GemfireFunctionProxyFactoryBean">
+       <property name="target" ref="customFunctions"/>
+       <property name="methodName" value="functionExecuteContextResultsInt"/>
+       <property name="functionName" value="FunctionExecuteContextResultsInt"/>
+       <property name="isHA" value="false"/>       
+       <property name="hasResults" value="false"/>       
+    </bean>
+
+</beans>

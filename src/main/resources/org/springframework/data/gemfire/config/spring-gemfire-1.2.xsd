@@ -1305,5 +1305,40 @@ The name of the pool used by the index. Used usually in client scenarios.
 		</xsd:annotation>
 		<xsd:union memberTypes="xsd:string"/>
 	</xsd:simpleType>
+
+    <!-- Function service -->
+    <xsd:element name="function-service" type="functionServiceType">
+    </xsd:element>
+
+    <xsd:complexType name="functionServiceType">
+        <xsd:sequence>
+            <xsd:element name="function" type="functionType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+The name of the function service definition (by default "gemfire-function-service").]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="base-package" type="xsd:string" use="optional"/>
+        <xsd:attribute name="scan-interface" type="xsd:string" use="optional" default="false"/>
+        <xsd:attribute name="scan-annotated" type="xsd:string" use="optional" default="false"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="functionType">
+        <xsd:attribute name="class" type="functionClassType"/>
+    </xsd:complexType>   
+
+    <xsd:simpleType name="functionClassType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="direct">
+                    <tool:expected-type type="java.lang.Class"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:union memberTypes="xsd:string"/>
+    </xsd:simpleType>
+
 	
 </xsd:schema>

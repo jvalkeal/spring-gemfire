@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.data.gemfire.function.Function;
+import org.springframework.data.gemfire.function.GemfireRepositoryFunction;
 import org.springframework.data.gemfire.function.FunctionTarget;
 import org.springframework.data.gemfire.function.MyArrayListResultCollector;
 import org.springframework.data.repository.Repository;
@@ -38,25 +38,25 @@ public interface MeasurementsRepository extends Repository<Measurements, String>
 
     long count();
 
-    @Function(id="MeasurementsByTagsFunction", target=FunctionTarget.ON_REGION, value="Measurements", collector=MyArrayListResultCollector.class)
+    @GemfireRepositoryFunction(id="MeasurementsByTagsFunction", target=FunctionTarget.ON_REGION, value="Measurements", collector=MyArrayListResultCollector.class)
     Collection<Measurements> queryByTags(String... tags);
 
-    @Function(id="MeasurementsByTagsFunction", collector=MyArrayListResultCollector.class, filter=2)
+    @GemfireRepositoryFunction(id="MeasurementsByTagsFunction", collector=MyArrayListResultCollector.class, filter=2)
     Collection<Measurements> queryByTagsAndFilter(String[] tags, Set<String> filter);
 
-    @Function(id="AddMeasurementTicksFunction")
+    @GemfireRepositoryFunction(id="AddMeasurementTicksFunction")
     void addMeasurementTicks(String id, List<Measurement> meas);
 
-    @Function(id="DeleteRegionEntriesFunction", target=FunctionTarget.ON_ALL_DS_MEMBERS)
+    @GemfireRepositoryFunction(id="DeleteRegionEntriesFunction", target=FunctionTarget.ON_ALL_DS_MEMBERS)
     void deleteRegionEntries(String regionId);
 
-    @Function(id="DeleteRegionEntriesFunction", target=FunctionTarget.ON_SERVER_POOL, value="clientMeasurementsPool")
+    @GemfireRepositoryFunction(id="DeleteRegionEntriesFunction", target=FunctionTarget.ON_SERVER_POOL, value="clientMeasurementsPool")
     void deleteRegionEntriesFromPool(String regionId);
 
-    @Function(id="RegionEntryCountFunction", target=FunctionTarget.ON_SERVER_POOL, value="clientMeasurementsPool")
+    @GemfireRepositoryFunction(id="RegionEntryCountFunction", target=FunctionTarget.ON_SERVER_POOL, value="clientMeasurementsPool")
     Collection<Integer> countFromPool(String regionId);
 
-    @Function(id="RegionEntryCountFunction", target=FunctionTarget.ON_SERVER_CACHE)
+    @GemfireRepositoryFunction(id="RegionEntryCountFunction", target=FunctionTarget.ON_SERVER_CACHE)
     Collection<Integer> countFromServer(String regionId);
 
 }

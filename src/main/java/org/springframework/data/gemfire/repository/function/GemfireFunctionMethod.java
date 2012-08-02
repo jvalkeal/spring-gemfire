@@ -18,7 +18,7 @@ package org.springframework.data.gemfire.repository.function;
 import java.lang.reflect.Method;
 
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.data.gemfire.function.Function;
+import org.springframework.data.gemfire.function.GemfireRepositoryFunction;
 import org.springframework.data.gemfire.function.FunctionTarget;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.QueryMethod;
@@ -42,13 +42,13 @@ public class GemfireFunctionMethod extends QueryMethod {
     }
 
     public String getFunctionId() {
-        Function function = method.getAnnotation(Function.class);
+        GemfireRepositoryFunction function = method.getAnnotation(GemfireRepositoryFunction.class);
         String functionIdString = function == null ? null : (String) AnnotationUtils.getValue(function, "id");
         return StringUtils.hasText(functionIdString) ? functionIdString : null;
     }
     
     public FunctionTarget getFunctionTarget() {
-        Function function = method.getAnnotation(Function.class);
+        GemfireRepositoryFunction function = method.getAnnotation(GemfireRepositoryFunction.class);
         if(function != null) {
             return function.target();
         }
@@ -56,7 +56,7 @@ public class GemfireFunctionMethod extends QueryMethod {
     }
     
     public String getFunctionValue() {
-        Function function = method.getAnnotation(Function.class);
+        GemfireRepositoryFunction function = method.getAnnotation(GemfireRepositoryFunction.class);
         if(function != null) {
             return function.value();
         }
@@ -64,22 +64,22 @@ public class GemfireFunctionMethod extends QueryMethod {
     }
 
     public Class<?> getFunctionCollector() {
-        Function function = method.getAnnotation(Function.class);
+        GemfireRepositoryFunction function = method.getAnnotation(GemfireRepositoryFunction.class);
         return function.collector();
     }
     
     public int getFunctionFilter() {
-        Function function = method.getAnnotation(Function.class);
+        GemfireRepositoryFunction function = method.getAnnotation(GemfireRepositoryFunction.class);
         return function.filter();
     }
     
     public long getFunctionTimeout() {
-        Function function = method.getAnnotation(Function.class);
+        GemfireRepositoryFunction function = method.getAnnotation(GemfireRepositoryFunction.class);
         return function.timeout();    
     }
     
     public String[] getFunctionMembers() {
-        Function function = method.getAnnotation(Function.class);
+        GemfireRepositoryFunction function = method.getAnnotation(GemfireRepositoryFunction.class);
         if(function != null) {
             return function.members();
         }

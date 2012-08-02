@@ -20,35 +20,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.gemstone.gemfire.cache.execute.ResultCollector;
-
-/**
- * Annotation defining gemfire function usage.
- * 
- * @author Janne Valkealahti
- */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Function {
-    
-    /** Function name */
-    String id();
-    
-    /** Target where function is executed. */
-    FunctionTarget target() default FunctionTarget.ON_REGION;
-    
-    /** Class implementing gemfire result collector */
-    Class<? extends ResultCollector<?, ?>> collector() default DefaultResultCollector.class;
+@Target(ElementType.PARAMETER)
+public @interface GemfireFunctionFilter {
 
-    /** Value identifying region or pool depending on a set target */
-    String value() default "";
-
-    /** Parameter to treated as functino filter. */
-    int filter() default -1;
-
-    /** Function execution timeout. */
-    long timeout() default -1;
-
-    /** List of distibuted member names. */
-    String[] members() default "";
 }
