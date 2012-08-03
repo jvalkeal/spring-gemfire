@@ -38,6 +38,8 @@ import com.gemstone.gemfire.cache.execute.ResultCollector;
 import com.gemstone.gemfire.distributed.DistributedSystem;
 
 /**
+ * Template class to handle function execution.
+ * 
  * @author David Turanski
  * @author Janne Valkealahti
  */
@@ -62,19 +64,28 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
      */
     private RegionService cache;
     
+    /**
+     * Default Constructor.
+     */
     public GemfireFunctionTemplate() {
-
     }
 
     /**
+     * Attach this template instance to a cache.
      * 
-     * @param cache
+     * @param cache Region service
      */
     public GemfireFunctionTemplate(RegionService cache) {
         this.cache = cache;
         afterPropertiesSet();
     }
 
+    /**
+     * Attach this template instance to a cache and
+     * sets a default template region.
+     * 
+     * @param region default region
+     */
     public GemfireFunctionTemplate(Region region) {
         this.defaultRegion = region;
         afterPropertiesSet();
@@ -110,10 +121,10 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
     }
 
     /**
-     * 
+     * Executes data independent function on server on cache.
      */
     @Override
-    public <T> T executeOnServerCache(final String functionId, final Object[] parameters,
+    public <T> T executeOnServerCache(final String functionId, final Serializable parameters,
             final ResultCollector<? extends Serializable,? extends Serializable> collector, final String value, final long timeout) {
         return execute(new GemfireFunctionCallback<T>() {
             @SuppressWarnings("unchecked")
@@ -125,10 +136,10 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
     }
 
     /**
-     * 
+     * Executes data independent function on cache.
      */
     @Override
-    public <T> T executeOnServersCache(final String functionId, final Object[] parameters,
+    public <T> T executeOnServersCache(final String functionId, final Serializable parameters,
             final ResultCollector<? extends Serializable,? extends Serializable> collector, final String value, final long timeout) {
         return execute(new GemfireFunctionCallback<T>() {
             @SuppressWarnings("unchecked")
@@ -140,10 +151,10 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
     }
     
     /**
-     * 
+     * Executes data independent function on server on pool.
      */
     @Override
-    public <T> T executeOnServerPool(final String functionId, final Object[] parameters,
+    public <T> T executeOnServerPool(final String functionId, final Serializable parameters,
             final ResultCollector<? extends Serializable,? extends Serializable> collector, final String value, final long timeout) {
         return execute(new GemfireFunctionCallback<T>() {
             @SuppressWarnings("unchecked")
@@ -155,10 +166,10 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
     }
 
     /**
-     * 
+     * Executes data independent function on servers pool.
      */
     @Override
-    public <T> T executeOnServersPool(final String functionId, final Object[] parameters,
+    public <T> T executeOnServersPool(final String functionId, final Serializable parameters,
             final ResultCollector<? extends Serializable,? extends Serializable> collector, final String value, final long timeout) {
         return execute(new GemfireFunctionCallback<T>() {
             @SuppressWarnings("unchecked")
@@ -170,10 +181,10 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
     }
 
     /**
-     * 
+     * Executed data independent function on all ds members.
      */
     @Override
-    public <T> T executeOnMembers(final String functionId, final Object[] parameters,
+    public <T> T executeOnMembers(final String functionId, final Serializable parameters,
             final ResultCollector<? extends Serializable,? extends Serializable> collector, final String value, final long timeout) {
         return execute(new GemfireFunctionCallback<T>() {
             @SuppressWarnings("unchecked")
@@ -185,10 +196,10 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
     }
 
     /**
-     * 
+     * Executes data dependent function on a region.
      */
     @Override
-    public <T> T executeOnRegion(final String functionId, final Object[] parameters,
+    public <T> T executeOnRegion(final String functionId, final Serializable parameters,
             final ResultCollector<? extends Serializable,? extends Serializable> collector, Set<?> filter, final String value, final long timeout) {
         return execute(new GemfireFunctionCallback<T>() {
             @SuppressWarnings("unchecked")
@@ -210,7 +221,7 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
      * @param timeout Function execution timeout
      * @return Object returned from the function execution
      */
-    public <T> T execute(GemfireFunctionCallback<T> callback, FunctionTarget target, Object[] parameters,
+    public <T> T execute(GemfireFunctionCallback<T> callback, FunctionTarget target, Serializable parameters,
             ResultCollector<? extends Serializable,? extends Serializable> collector, Set<?> filter, String value, long timeout) {
         Assert.notNull(callback, "Callback object must not be null");
         
@@ -260,8 +271,10 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
         }
 
     }
-    
-    private static Execution addExecutionOptions(Execution execution, Serializable args, ResultCollector<? extends Serializable,? extends Serializable> rc, Set<?> filter) {
+
+    /** Helper method to add execution options. */
+    private static Execution addExecutionOptions(Execution execution, Serializable args,
+            ResultCollector<? extends Serializable, ? extends Serializable> rc, Set<?> filter) {
         Execution ret = execution;
         if(args != null) {
             ret = ret.withArgs(args);
@@ -275,6 +288,7 @@ public class GemfireFunctionTemplate implements InitializingBean, GemfireFunctio
         return ret;
     }
     
+    /** Helper method to find running ds. */
     private static DistributedSystem findRunningDs() {
         
         // we'll find running ds if we're on running cache

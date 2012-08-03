@@ -22,6 +22,7 @@ import java.util.Properties;
 
  
 import org.springframework.data.gemfire.ForkUtil;
+import org.springframework.data.gemfire.function.ValueSumFunction;
 
 import com.gemstone.gemfire.cache.AttributesFactory;
 import com.gemstone.gemfire.cache.Cache;
@@ -70,9 +71,8 @@ public class FunctionCacheServerProcess {
 		testRegion.put("three", 3);	
 	
 		FunctionService.registerFunction(new ServerFunction());
+        FunctionService.registerFunction(new ValueSumFunction());
 		 
-//		FunctionService.registerFunction(new MethodInvokingFunction());
-		
 		ForkUtil.createControlFile(FunctionCacheServerProcess.class.getName());
 		
 		System.out.println("Waiting for shutdown");

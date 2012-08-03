@@ -19,14 +19,7 @@ public class RegionEntryCountFunction extends FunctionAdapter {
         Region<Object, Object> region = anyInstance.getRegion((String)arguments[0]);
         
         Region<Object, Object> localPrimaryData = PartitionRegionHelper.getLocalPrimaryData(region);
-        
-//        try {
-//            Thread.sleep(10000);
-//        } catch (InterruptedException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-        
+                
         fc.getResultSender().lastResult(localPrimaryData.size());
     }
 

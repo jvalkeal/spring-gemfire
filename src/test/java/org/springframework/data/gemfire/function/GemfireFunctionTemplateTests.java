@@ -14,6 +14,10 @@ package org.springframework.data.gemfire.function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
 
 import java.util.List;
 import java.util.Properties;
@@ -23,7 +27,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.data.gemfire.ForkUtil;
 import org.springframework.data.gemfire.fork.FunctionCacheServerProcess;
-import org.springframework.data.gemfire.function.foo.Foo;
 
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.client.ClientCache;
@@ -85,28 +88,19 @@ public class GemfireFunctionTemplateTests {
 		cache = null;
 	}
 	
-//	@Test 
-//	public void testExecuteOnRegion() {
-//		GemfireFunctionOperations<Integer> functionTemplate = new GemfireFunctionTemplate<Integer>(cache);
-//		RemoteMethodInvocation invocation = new RemoteMethodInvocation(Foo.class,"oneArg", "two");
-//		List<Integer> result = functionTemplate.executeOnRegion(new MethodInvokingFunction().getId(),"test-function",invocation);
-//		assertEquals(2,result.get(0).intValue());
-//	}
-//	
-//	@Test 
-//	public void testExecuteOnRegionAndExtract() {
-//		GemfireFunctionOperations<Integer> functionTemplate = new GemfireFunctionTemplate<Integer>(cache);
-//		RemoteMethodInvocation invocation = new RemoteMethodInvocation(Foo.class,"twoArg", "two","three");
-//		int result = functionTemplate.executeOnRegionAndExtract(new MethodInvokingFunction(),"test-function",invocation);
-//		assertEquals(5,result);
-//	}
-//	
-//	@Test 
-//	public void testExecuteOnServer() {
-//		assertNull(clientRegion.get("four"));
-//		GemfireFunctionOperations<?> functionTemplate = new GemfireFunctionTemplate<Object>(cache);
-//		functionTemplate.executeOnServers("serverFunction","four",4);
-//		assertEquals(4,clientRegion.get("four").intValue());
-//		
-//	}
+	@Test 
+	public void testExecuteOnRegion() {
+		GemfireFunctionOperations template = new GemfireFunctionTemplate(cache);
+		List<Integer> sumList = template.executeOnRegion("ValueSumFunction", null, null, null, "test-function", -1);
+		assertThat(sumList.size(), is(1));
+	}
+	
+    @Test
+    public void testExecuteOnRegionWithCollector() {
+        GemfireFunctionOperations template = new GemfireFunctionTemplate(cache);
+        IntegerSumResultCollector collector = new IntegerSumResultCollector();
+        Integer sum = template.executeOnRegion("ValueSumFunction", null, collector, null, "test-function", -1);
+        assertThat(sum, is(6));
+    }
+
 }

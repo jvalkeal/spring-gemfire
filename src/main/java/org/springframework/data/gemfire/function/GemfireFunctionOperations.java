@@ -19,28 +19,29 @@ import com.gemstone.gemfire.cache.execute.ResultCollector;
 
 /**
  * @author David Turanski
+ * @author Janne Valkealahti
  *
- * @param <T>
+ * @param <T> Typed as a return value from a result collector.
  */
 public interface GemfireFunctionOperations {
 
-    public <T> T executeOnRegion(String functionId, Object[] parameters,
+    public <T> T executeOnRegion(String functionId, Serializable parameters,
             ResultCollector<? extends Serializable, ? extends Serializable> collector, Set<?> filter, String value,
             long timeout);
 
-    public <T> T executeOnMembers(String functionId, Object[] parameters,
+    public <T> T executeOnMembers(String functionId, Serializable parameters,
             ResultCollector<? extends Serializable, ? extends Serializable> collector, String value, long timeout);
 
-    public <T> T executeOnServersPool(String functionId, Object[] parameters,
+    public <T> T executeOnServersPool(String functionId, Serializable parameters,
             ResultCollector<? extends Serializable, ? extends Serializable> collector, String value, long timeout);
 
-    public <T> T executeOnServerPool(String functionId, Object[] parameters,
+    public <T> T executeOnServerPool(String functionId, Serializable parameters,
             ResultCollector<? extends Serializable, ? extends Serializable> collector, String value, long timeout);
 
-    public <T> T executeOnServersCache(String functionId, Object[] parameters,
+    public <T> T executeOnServersCache(String functionId, Serializable parameters,
             ResultCollector<? extends Serializable, ? extends Serializable> collector, String value, long timeout);
 
-    public <T> T executeOnServerCache(String functionId, Object[] parameters,
+    public <T> T executeOnServerCache(String functionId, Serializable parameters,
             ResultCollector<? extends Serializable, ? extends Serializable> collector, String value, long timeout);
 
 }

@@ -33,14 +33,17 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.gemfire.function.DefaultResultCollector;
 import org.springframework.data.gemfire.function.FunctionTarget;
+import org.springframework.data.gemfire.function.GemfireFunctionArgs;
 import org.springframework.data.gemfire.function.GemfireFunctionExecute;
 import org.springframework.data.gemfire.function.GemfireFunctionFilter;
 import org.springframework.data.gemfire.function.GemfireFunctionTemplate;
+import org.springframework.expression.spel.support.ReflectionHelper.ArgsMatchKind;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import com.gemstone.gemfire.cache.GemFireCache;
 import com.gemstone.gemfire.cache.execute.ResultCollector;
+import com.sun.org.apache.xpath.internal.Arg;
 
 /**
  * 
@@ -87,7 +90,9 @@ public class GemfireFunctionExecuteProxyFactoryBean implements FactoryBean<Objec
         for (Method method : methods) {
             GemfireFunctionExecute executeAnnotation = AnnotationUtils.findAnnotation(method, GemfireFunctionExecute.class);
             GemfireFunctionFilter filterAnnotation = null;
+            GemfireFunctionArgs argsAnnotation = null;
             int filterAnnotationParameter = -1;
+            int argsAnnotationParameter = -1;
             if(executeAnnotation != null) {
                 Method mappedMethod = null;
                 for(Class<?> clazz: ifcs) {
@@ -106,13 +111,25 @@ public class GemfireFunctionExecuteProxyFactoryBean implements FactoryBean<Objec
                                 }
                             }
                         }
-                        
+
+                        for (int i = 0; i < parameters.length; i++) {
+                            Annotation[] annotations = parameters[i];
+                            for (Annotation annotation : annotations) {
+                                if(annotation instanceof GemfireFunctionArgs) {
+                                    argsAnnotation = (GemfireFunctionArgs) annotation;
+                                    argsAnnotationParameter = i;
+                                    break;
+                                }
+                            }
+                        }
+
                         break;
                     } catch (Exception e) {
                     }
                 }
                 if(mappedMethod != null) {
-                    mappedAnnotations.put(mappedMethod, new MethodAnnotations(executeAnnotation, filterAnnotation, filterAnnotationParameter));                    
+                    mappedAnnotations.put(mappedMethod, new MethodAnnotations(executeAnnotation, filterAnnotation,
+                            filterAnnotationParameter, argsAnnotation, argsAnnotationParameter));
                 }
             }
         }
@@ -153,7 +170,10 @@ public class GemfireFunctionExecuteProxyFactoryBean implements FactoryBean<Objec
 
             GemfireFunctionExecute executeAnnotation = this.mappedAnnotations.get(method).executeAnnotation;
             GemfireFunctionFilter filterAnnotation = this.mappedAnnotations.get(method).filterAnnotation;
+            GemfireFunctionArgs argsAnnotation = this.mappedAnnotations.get(method).argsAnnotation;
+            
             int filterArgIndex = this.mappedAnnotations.get(method).filterAnnotationParameter;
+            int argsArgIndex = this.mappedAnnotations.get(method).argsAnnotationParameter;
             // if we have annotated method, intercept for function execution
             if(executeAnnotation != null) {
                 GemfireFunctionTemplate template = new GemfireFunctionTemplate(cache);
@@ -164,8 +184,13 @@ public class GemfireFunctionExecuteProxyFactoryBean implements FactoryBean<Objec
                     collector = (ResultCollector<? extends Serializable, ? extends Serializable>) BeanUtils.instantiate(executeAnnotation.collector());
                 }
                 
+                Serializable parameters = null;
+                if(argsArgIndex > -1) {
+                    parameters = (Serializable) args[argsArgIndex];
+                }
+                
                 if(executeAnnotation.target() == FunctionTarget.ON_ALL_DS_MEMBERS) {
-                    return template.executeOnMembers(functionName, null, collector, executeAnnotation.value(), executeAnnotation.timeout());                    
+                    return template.executeOnMembers(functionName, parameters, collector, executeAnnotation.value(), executeAnnotation.timeout());                    
                 } else if(executeAnnotation.target() == FunctionTarget.ON_REGION) {
                     Set<?> filter = null;
                     if(filterArgIndex > -1) {
@@ -191,12 +216,19 @@ public class GemfireFunctionExecuteProxyFactoryBean implements FactoryBean<Objec
     
     /** Helper class to store method annotations. */
     private class MethodAnnotations {
+        
         GemfireFunctionExecute executeAnnotation;
         GemfireFunctionFilter filterAnnotation;
         int filterAnnotationParameter = -1;
-        public MethodAnnotations(GemfireFunctionExecute executeAnnotation, GemfireFunctionFilter filterAnnotation, int filterAnnotationParameter) {
+        GemfireFunctionArgs argsAnnotation;
+        int argsAnnotationParameter = -1;
+
+        public MethodAnnotations(GemfireFunctionExecute executeAnnotation, GemfireFunctionFilter filterAnnotation,
+                int filterAnnotationParameter, GemfireFunctionArgs argsAnnotation, int argsAnnotationParameter) {
             super();
             this.executeAnnotation = executeAnnotation;
+            this.argsAnnotation = argsAnnotation;
+            this.argsAnnotationParameter = argsAnnotationParameter;
             this.filterAnnotation = filterAnnotation;
             this.filterAnnotationParameter = filterAnnotationParameter;
         }        

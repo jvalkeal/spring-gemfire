@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.gemfire.function.GemfireFunctionArgs;
 import org.springframework.data.gemfire.function.GemfireFunctionContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -248,6 +249,10 @@ public class GemfireFunctionProxyFactoryBean implements FactoryBean<Function>, I
                         } else {
                             invokeArgs[i] = null;
                         }
+                    } else if(hasGemfireFunctionArgsAnnotation(i)) {
+                        invokeArgs[i] = context.getArguments();
+                    } else {
+                        invokeArgs[i] = null;                        
                     }
                 }
                 
@@ -279,6 +284,19 @@ public class GemfireFunctionProxyFactoryBean implements FactoryBean<Function>, I
             Annotation[] annotations = parameterAnnotations[parameter];
             for (Annotation annotation : annotations) {
                 if(annotation instanceof GemfireFunctionContext) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private <T extends Annotation> boolean hasGemfireFunctionArgsAnnotation(int parameter) {
+            if(parameterAnnotations.length < parameter && parameter >= 0) {
+                return false;
+            }
+            Annotation[] annotations = parameterAnnotations[parameter];
+            for (Annotation annotation : annotations) {
+                if(annotation instanceof GemfireFunctionArgs) {
                     return true;
                 }
             }

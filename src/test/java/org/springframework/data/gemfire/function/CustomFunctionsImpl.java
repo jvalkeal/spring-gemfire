@@ -15,6 +15,7 @@
  */
 package org.springframework.data.gemfire.function;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -61,6 +62,13 @@ public class CustomFunctionsImpl implements CustomFunctions {
         Region<Object, Object> localPrimaryData = PartitionRegionHelper.getLocalPrimaryData(ctx.getDataSet());
         Set<Entry<Object, Object>> entrySet = localPrimaryData.entrySet();
         return entrySet;
+    }
+    
+    @Override
+    @GemfireFunction(id="FunctionExecuteResultsParametersInt")
+    @GemfireFunctionExecute(id="FunctionExecuteResultsParametersInt", target=FunctionTarget.ON_ALL_DS_MEMBERS)
+    public Object functionExecuteResultsParametersInt(@GemfireFunctionArgs Integer args) {
+        return args;
     }
 
     public int noInterfaceMethod() {

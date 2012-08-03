@@ -126,4 +126,13 @@ public class GemfireFunctionServiceTests {
         }
     }
 
+    @Test
+    public void testInterceptedFunctionExecution4() {
+        Object returned = customFunctions.functionExecuteResultsParametersInt(123);
+        List<Integer> result = (List<Integer>) returned;
+        assertNotNull(result);
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0), is(123));        
+    }
+
 }

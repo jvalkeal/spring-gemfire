@@ -15,24 +15,13 @@
  */
 package org.springframework.data.gemfire.function;
 
-import java.util.List;
-import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.gemstone.gemfire.cache.execute.FunctionContext;
-import com.gemstone.gemfire.cache.execute.RegionFunctionContext;
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+public @interface GemfireFunctionArgs {
 
-public interface CustomFunctions {
-
-    void functionIdContextResultsVoid(FunctionContext ctx);
-
-    int functionExecuteContextResultsInt(FunctionContext ctx);
-
-    List<Integer> executeIdList();
-
-    Object functionExecuteResultsString();
-
-    Object functionExecuteResultsEntrySet(RegionFunctionContext ctx, Set<String> filter);
-
-    Object functionExecuteResultsParametersInt(Integer args);
-    
 }
