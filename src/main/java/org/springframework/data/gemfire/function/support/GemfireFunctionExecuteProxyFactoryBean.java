@@ -37,13 +37,11 @@ import org.springframework.data.gemfire.function.GemfireFunctionArgs;
 import org.springframework.data.gemfire.function.GemfireFunctionExecute;
 import org.springframework.data.gemfire.function.GemfireFunctionFilter;
 import org.springframework.data.gemfire.function.GemfireFunctionTemplate;
-import org.springframework.expression.spel.support.ReflectionHelper.ArgsMatchKind;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import com.gemstone.gemfire.cache.GemFireCache;
 import com.gemstone.gemfire.cache.execute.ResultCollector;
-import com.sun.org.apache.xpath.internal.Arg;
 
 /**
  * 

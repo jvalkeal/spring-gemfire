@@ -5,15 +5,20 @@
     xsi:schemaLocation="http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire.xsd
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <!-- properties to test injected values to proxied function implementations. -->
+    <bean id="placeholderProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="fakekey1">fakevalue1set</prop>
+            </props>
+        </property>
+    </bean>
+
     <gfe:cache use-bean-factory-locator="false" />
     <gfe:partitioned-region id="Measurements" />
 
-    <gfe:function-service base-package="org.springframework.data.gemfire.function" scan-interface="true" scan-annotated="true"/>
-
-    <bean id="customFunctions" class="org.springframework.data.gemfire.function.CustomFunctionsImpl"/>
-    <bean id="customFunctionsExecuteIdList" class="org.springframework.data.gemfire.function.support.GemfireFunctionExecuteProxyFactoryBean">
-       <property name="target" ref="customFunctions"/>
-       <property name="cache" ref="gemfire-cache"/>
-    </bean>
+    <gfe:function-service base-package="org.springframework.data.gemfire.function" scan-interface="true" scan-annotated="true">
+        <gfe:function class="org.springframework.data.gemfire.function.AddMeasurementTicksFunction"/>
+    </gfe:function-service>
 
 </beans>

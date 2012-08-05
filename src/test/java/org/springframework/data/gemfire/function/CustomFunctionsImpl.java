@@ -15,10 +15,11 @@
  */
 package org.springframework.data.gemfire.function;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Value;
 
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.execute.FunctionContext;
@@ -27,6 +28,14 @@ import com.gemstone.gemfire.cache.partition.PartitionRegionHelper;
 
 @GemfireFunctionService
 public class CustomFunctionsImpl implements CustomFunctions {
+
+    // should exist in context, injected
+    @Value("${fakekey1:fakevalue1default}")
+    private String fakekey1;
+
+    // should not exist in context, using default
+    @Value("${fakekey2:fakevalue2default}")
+    private String fakekey2;
     
     @Override
     @GemfireFunction(id="FunctionIdContextResultsVoid")
@@ -69,6 +78,13 @@ public class CustomFunctionsImpl implements CustomFunctions {
     @GemfireFunctionExecute(id="FunctionExecuteResultsParametersInt", target=FunctionTarget.ON_ALL_DS_MEMBERS)
     public Object functionExecuteResultsParametersInt(@GemfireFunctionArgs Integer args) {
         return args;
+    }
+
+    @Override
+    @GemfireFunction
+    @GemfireFunctionExecute(target=FunctionTarget.ON_ALL_DS_MEMBERS)
+    public Object functionExecuteInjectedValuesResultsString() {
+        return fakekey1 + "-" + fakekey2;
     }
 
     public int noInterfaceMethod() {

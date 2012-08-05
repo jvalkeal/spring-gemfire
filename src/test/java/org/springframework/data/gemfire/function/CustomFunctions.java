@@ -34,5 +34,7 @@ public interface CustomFunctions {
     Object functionExecuteResultsEntrySet(RegionFunctionContext ctx, Set<String> filter);
 
     Object functionExecuteResultsParametersInt(Integer args);
+
+    Object functionExecuteInjectedValuesResultsString();
     
 }

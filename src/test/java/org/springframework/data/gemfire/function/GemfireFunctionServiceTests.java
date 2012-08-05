@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -52,7 +53,7 @@ public class GemfireFunctionServiceTests {
     @Before
     public void setup() {
         region = (Region)ctx.getBean("Measurements");
-        customFunctions = (CustomFunctions)ctx.getBean("customFunctionsExecuteIdList");
+        customFunctions = (CustomFunctions)ctx.getBean("gemfireFunctionExecuteProxyFactoryBean-customFunctionsImpl");
         ds = CacheFactory.getAnyInstance().getDistributedSystem();
         
         // just warm up region by adding some content
@@ -63,11 +64,15 @@ public class GemfireFunctionServiceTests {
     
     @Test
     public void testFunctionsRegistered() {
+        
+        ctx.getBeansOfType(Function.class);
+        
+        // from interface
+        assertNotNull(FunctionService.getFunction("AddMeasurementTicksFunction"));
+        
         // from annotations
         assertNotNull(FunctionService.getFunction("FunctionIdContextResultsVoid"));
         assertNotNull(FunctionService.getFunction("functionExecuteContextResultsInt"));
-        // from interface
-        assertNotNull(FunctionService.getFunction("AddMeasurementTicksFunction"));
     }
     
     @Test
@@ -133,6 +138,17 @@ public class GemfireFunctionServiceTests {
         assertNotNull(result);
         assertThat(result.size(), is(1));
         assertThat(result.get(0), is(123));        
+    }
+
+    @Test
+    public void testInterceptedFunctionExecution5() {
+        // testing that ioc injects property values to CustomFunctionsImpl
+        // and those readable in custom annotated functions.
+        Object returned = customFunctions.functionExecuteInjectedValuesResultsString();
+        List<String> result = (List<String>) returned;
+        assertNotNull(result);
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0), is("fakevalue1set-fakevalue2default"));        
     }
 
 }

@@ -21,8 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,6 +31,7 @@ import org.springframework.util.ClassUtils;
 
 import com.gemstone.gemfire.cache.execute.Function;
 import com.gemstone.gemfire.cache.execute.FunctionContext;
+import com.gemstone.gemfire.cache.execute.FunctionService;
 import com.gemstone.gemfire.cache.execute.RegionFunctionContext;
 
 /**
@@ -63,8 +62,6 @@ import com.gemstone.gemfire.cache.execute.RegionFunctionContext;
  */
 public class GemfireFunctionProxyFactoryBean implements FactoryBean<Function>, InitializingBean {
     
-    private final static Log log = LogFactory.getLog(GemfireFunctionProxyFactoryBean.class);
-
     /** Function name, must be set. */
     private String functionName;
     
@@ -138,6 +135,9 @@ public class GemfireFunctionProxyFactoryBean implements FactoryBean<Function>, I
                 optimizedForWrite, method, target, parameterAnnotations);        
         
         functionProxy = (Function)Proxy.newProxyInstance(getClass().getClassLoader(), ifcs, fih);
+        
+        FunctionService.registerFunction(functionProxy);
+
     }
     
     /**
@@ -258,10 +258,6 @@ public class GemfireFunctionProxyFactoryBean implements FactoryBean<Function>, I
                 
                 Object returned = targetMethod.invoke(targetObject, invokeArgs);
                 
-                // if method returns something(else than void),
-                // handle it here through result sender
-                log.info("XXXXX: " + returned + " / " +
-                        targetMethod.toGenericString());
                 if(returned != null) {
                     context.getResultSender().lastResult(returned);
                 }
