@@ -1308,21 +1308,45 @@ The name of the pool used by the index. Used usually in client scenarios.
 
     <!-- Function service -->
     <xsd:element name="function-service" type="functionServiceType">
+        <xsd:annotation>
+            <xsd:documentation source="org.springframework.data.gemfire.config.GemfireFunctionServiceParser"><![CDATA[
+                Initializes Gemfire functions.
+            ]]></xsd:documentation>
+        </xsd:annotation>
     </xsd:element>
 
     <xsd:complexType name="functionServiceType">
         <xsd:sequence>
             <xsd:element name="function" type="functionType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" use="optional">
+        <xsd:attribute name="cache-ref" type="xsd:string" default="gemfire-cache" use="optional">
             <xsd:annotation>
                 <xsd:documentation><![CDATA[
-The name of the function service definition (by default "gemfire-function-service").]]></xsd:documentation>
+                    The name of the bean defining the GemFire cache (by default 'gemfire-cache').
+                ]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="base-package" type="xsd:string" use="optional"/>
-        <xsd:attribute name="scan-interface" type="xsd:string" use="optional" default="false"/>
-        <xsd:attribute name="scan-annotated" type="xsd:string" use="optional" default="false"/>
+        <xsd:attribute name="base-package" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+                    Defines the base package where the function implementations will be tried to be detected.
+                ]]></xsd:documentation>
+            </xsd:annotation>        
+        </xsd:attribute>
+        <xsd:attribute name="scan-interface" type="xsd:string" use="optional" default="false">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+                    Defines if Gemfire native function implementations are scanned.
+                ]]></xsd:documentation>
+            </xsd:annotation>        
+        </xsd:attribute>
+        <xsd:attribute name="scan-annotated" type="xsd:string" use="optional" default="false">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+                    Defines if annotated function function proxies are scanned.
+                ]]></xsd:documentation>
+            </xsd:annotation>        
+        </xsd:attribute>
     </xsd:complexType>
 
     <xsd:complexType name="functionType">
@@ -1331,6 +1355,9 @@ The name of the function service definition (by default "gemfire-function-servic
 
     <xsd:simpleType name="functionClassType">
         <xsd:annotation>
+            <xsd:documentation><![CDATA[
+                Defines class implementing Gemfire Function interface.
+            ]]></xsd:documentation>
             <xsd:appinfo>
                 <tool:annotation kind="direct">
                     <tool:expected-type type="java.lang.Class"/>

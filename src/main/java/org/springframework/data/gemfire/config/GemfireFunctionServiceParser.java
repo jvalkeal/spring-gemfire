@@ -47,6 +47,7 @@ public class GemfireFunctionServiceParser implements BeanDefinitionParser {
     private static final String BASE_PACKAGE_ATTRIBUTE = "base-package";
     private static final String SCAN_INTERFACE_ATTRIBUTE = "scan-interface";
     private static final String SCAN_ANNOTATED_ATTRIBUTE = "scan-annotated";
+    private static final String CACHE_REF_ATTRIBUTE = "cache-ref";
 
     @Override
     public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -86,6 +87,7 @@ public class GemfireFunctionServiceParser implements BeanDefinitionParser {
         }
         
         FunctionBeanDefinitionScanner scanner = createScanner(readerContext);
+        scanner.setCacheRefBeanName(element.getAttribute(CACHE_REF_ATTRIBUTE));
         
         if(scanInterfaces) {
             scanner.addIncludeFilter(new AssignableTypeFilter(Function.class));            

@@ -94,6 +94,7 @@ public class FunctionBeanDefinitionScanner extends ClassPathScanningCandidateCom
     public final static String BEAN_PROPERTY_TARGETCLASSNAME = "targetClassName";
     public final static String BEAN_PROPERTY_FUNCTIONNAME = "functionName";
     public final static String BEAN_PROPERTY_CACHE = "cache";
+    public final static String BEAN_PROPERTY_CACHE_REF = "cache-ref";
         
     private final BeanDefinitionRegistry registry;
 
@@ -102,6 +103,8 @@ public class FunctionBeanDefinitionScanner extends ClassPathScanningCandidateCom
     private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
     
     private String[] autowireCandidatePatterns;
+    
+    private String cacheRefBeanName = "gemfire-cache";
 
     public FunctionBeanDefinitionScanner(BeanDefinitionRegistry registry) {
         this(registry, getOrCreateEnvironment(registry));
@@ -117,6 +120,15 @@ public class FunctionBeanDefinitionScanner extends ClassPathScanningCandidateCom
         if (this.registry instanceof ResourceLoader) {
             setResourceLoader((ResourceLoader) this.registry);
         }
+    }
+    
+    /**
+     * Sets name of a runtime bean reference to Gemfire cache.
+     * 
+     * @param cacheRefBeanName runtime bean reference to gemfire cache.
+     */
+    public void setCacheRefBeanName(String cacheRefBeanName) {
+        this.cacheRefBeanName = cacheRefBeanName;
     }
 
     /**
@@ -241,7 +253,7 @@ public class FunctionBeanDefinitionScanner extends ClassPathScanningCandidateCom
                     GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
                     beanDefinition.setBeanClassName(GEMFIREFUNCTIONEXECUTEPROXYFACTORYBEAN_CLASSNAME);
                     beanDefinition.getPropertyValues().add(BEAN_PROPERTY_TARGET, new RuntimeBeanReference(functionImplClassName));
-                    beanDefinition.getPropertyValues().add(BEAN_PROPERTY_CACHE, new RuntimeBeanReference("gemfire-cache"));
+                    beanDefinition.getPropertyValues().add(BEAN_PROPERTY_CACHE, new RuntimeBeanReference(cacheRefBeanName));
                     beanDefinitions.add(beanDefinition);                                        
                 }
                 
