@@ -175,39 +175,26 @@ public class FunctionBeanDefinitionScanner extends ClassPathScanningCandidateCom
         if(functionClasses.isEmpty()) {
             return beanDefinitions;
         }
-        
-        // adding explicit native function, check that bean
-        // wasn't created during the classpath scan.
-        Set<String> existing = new HashSet<String>();
-        for (BeanDefinitionHolder holder : beanDefinitions) {
-            String beanClassName = holder.getBeanDefinition().getBeanClassName();
-            if (beanClassName.equals(FunctionBeanDefinitionScanner.GEMFIREFUNCTIONFACTORYBEAN_CLASSNAME)) {
-                PropertyValue property = holder.getBeanDefinition().getPropertyValues().getPropertyValue("targetClassName");
-                existing.add((String) property.getValue());
+                
+        for (String functionClazz : functionClasses) {
+            GenericBeanDefinition candidate = new GenericBeanDefinition();
+            candidate.setBeanClassName(GEMFIREFUNCTIONFACTORYBEAN_CLASSNAME);
+            candidate.getPropertyValues().add(BEAN_PROPERTY_TARGETCLASSNAME, functionClazz);
+
+            ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+            candidate.setScope(scopeMetadata.getScopeName());
+
+            String beanName = generateBeanName(candidate);
+            if (candidate instanceof AbstractBeanDefinition) {
+                postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
             }
-        }
-        
-        for(String functionClazz : functionClasses) {
-            if (!existing.contains(functionClazz)) {
-                GenericBeanDefinition candidate = new GenericBeanDefinition();
-                candidate.setBeanClassName(GEMFIREFUNCTIONFACTORYBEAN_CLASSNAME);
-                candidate.getPropertyValues().add(BEAN_PROPERTY_TARGETCLASSNAME, functionClazz);
-                
-                ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-                candidate.setScope(scopeMetadata.getScopeName());
-                
-                String beanName = generateBeanName(candidate);
-                if (candidate instanceof AbstractBeanDefinition) {
-                    postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
-                }
-                                    
-                if (checkCandidate(beanName, candidate)) {
-                    BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-                    beanDefinitions.add(definitionHolder);
-                    registerBeanDefinition(definitionHolder, this.registry);
-                }
-                
-            }            
+
+            if (checkCandidate(beanName, candidate)) {
+                BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+                beanDefinitions.add(definitionHolder);
+                registerBeanDefinition(definitionHolder, this.registry);
+            }
+
         }
         
         return beanDefinitions;
@@ -336,7 +323,6 @@ public class FunctionBeanDefinitionScanner extends ClassPathScanningCandidateCom
         if (isCompatible(beanDefinition, existingDef)) {
             return false;
         }
-        // ConflictingBeanDefinitionException
         throw new IllegalStateException("Annotation-specified bean name '" + beanName +
                 "' for bean class [" + beanDefinition.getBeanClassName() + "] conflicts with existing, " +
                 "non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]");
@@ -347,16 +333,24 @@ public class FunctionBeanDefinitionScanner extends ClassPathScanningCandidateCom
      * the given existing bean definition.
      * <p>The default implementation simply considers them as compatible
      * when the bean class name matches.
+     * 
      * @param newDefinition the new bean definition, originated from scanning
      * @param existingDefinition the existing bean definition, potentially an
      * explicitly defined one or a previously generated one from scanning
+     * 
      * @return whether the definitions are considered as compatible, with the
      * new definition to be skipped in favor of the existing definition
      */
     protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
-        return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
-                newDefinition.getSource().equals(existingDefinition.getSource()) ||  // scanned same file twice
-                newDefinition.equals(existingDefinition));  // scanned equivalent class twice
+        if(existingDefinition instanceof ScannedGenericBeanDefinition &&
+                newDefinition instanceof ScannedGenericBeanDefinition) { // explicitly registered overriding bean
+            return (!(newDefinition.getSource().equals(existingDefinition.getSource()) ||  // scanned same file twice
+                  newDefinition.equals(existingDefinition)));  // scanned equivalent class twice
+            
+        } else {
+            return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
+                    newDefinition.equals(existingDefinition));  // scanned equivalent class twice
+        }
     }
 
     /**

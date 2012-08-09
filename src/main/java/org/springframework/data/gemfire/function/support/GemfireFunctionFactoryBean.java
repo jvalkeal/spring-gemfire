@@ -15,9 +15,19 @@
  */
 package org.springframework.data.gemfire.function.support;
 
+import java.util.Set;
+
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -30,7 +40,7 @@ import com.gemstone.gemfire.cache.execute.FunctionService;
  * 
  * @author Janne Valkealahti
  */
-public class GemfireFunctionFactoryBean implements FactoryBean<Function>, InitializingBean {
+public class GemfireFunctionFactoryBean implements FactoryBean<Function>, InitializingBean, ApplicationContextAware  {
 
     /** Function target class */
     private Class<Function> targetClass;
@@ -40,6 +50,8 @@ public class GemfireFunctionFactoryBean implements FactoryBean<Function>, Initia
 
     /** Function created by this factory */
     private Function function;
+    
+    private ApplicationContext applicationContext;
 
     public GemfireFunctionFactoryBean() {
         super();
@@ -69,8 +81,14 @@ public class GemfireFunctionFactoryBean implements FactoryBean<Function>, Initia
             targetClass = (Class<Function>) ClassUtils.forName(targetClassName, getClass().getClassLoader());
         }
         function = BeanUtils.instantiate(targetClass);
+        applicationContext.getAutowireCapableBeanFactory().autowireBean(function);
         FunctionService.registerFunction(function);
     }    
+    
+    @Override
+    public void setApplicationContext(final ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
     
     /**
      * Sets target class which this factory is using
@@ -90,6 +108,6 @@ public class GemfireFunctionFactoryBean implements FactoryBean<Function>, Initia
      */
     public void setTargetClassName(String targetClassName) {
         this.targetClassName = targetClassName;
-    }
+    }    
 
 }

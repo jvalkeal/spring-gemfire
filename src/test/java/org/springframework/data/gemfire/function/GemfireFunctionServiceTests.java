@@ -151,4 +151,14 @@ public class GemfireFunctionServiceTests {
         assertThat(result.get(0), is("fakevalue1set-fakevalue2default"));        
     }
 
+    @Test
+    public void testNativeFunctionAutowiredValues() {
+        Execution onMembers = FunctionService.onMembers(ds);
+        ResultCollector<?, ?> execute = onMembers.execute("AutowireValuesFunction");
+        List<String> result = (List<String>) execute.getResult();
+        assertNotNull(result);
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0), is("fakevalue1set-fakevalue2default"));
+    }
+
 }
